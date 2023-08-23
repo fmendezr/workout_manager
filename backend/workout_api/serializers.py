@@ -40,7 +40,7 @@ class WorkoutSerializer(serializers.ModelSerializer):
         fields = ['user', 'date', 'workout_components']
 
     def create(self, validated_data):
-        workout_components_data = validated_data.pop('tracks')
+        workout_components_data = validated_data.pop('workout_components')
         workout = models.Workout.objects.create(**validated_data)
         for workout_component_data in workout_components_data:
             models.WorkoutComponent.objects.create(workout=workout, **workout_component_data)
