@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { faCheck, faTimes, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faTimes, faInfoCircle, faArrowTrendUp } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import axios from "./api/axios";
 
 import Card from 'react-bootstrap/Card';
 import Alert from 'react-bootstrap/Alert';
@@ -9,6 +10,7 @@ import Button from 'react-bootstrap/Button';
 
 const USER_REGEX = /^[a-zA-Z][a-zA-Z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
+const REGISTER_URL = '/api/register/';
 
 const Register = () => {
     const userRef = useRef();  
@@ -55,17 +57,36 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
         const v1 = USER_REGEX.test(user)
         const v2 = PWD_REGEX.test(pwd)
         if (!v1 || !v2 ) {
             setErrMsg('Invalid Entry');
             return;
         }
-        
+        try {
+            const response = await axios.post(REGISTER_URL, 
+                {
+                    username: user,
+                    password: pwd
+                }
+            );
+            console.log(response.data);
+            console.log(JSON.stringify(response));
+            setSuccess(true)
+        } catch (err) {
+            if (!err?.response) {
+                setErrMsg('No Server Response');
+            } else if (err.response?.status === 409){
+                setErrMsg('Username taken');
+            } else {
+                setErrMsg('Registration Failed');
+            }
+        }
     }
 
     return (
+        <>
+        {success ? (<Alert key='primary' variant="primary">Registration was a Success! <a>Sign In</a></Alert>) : (
         <Card style={{ width: '280px'}}>
             <Card.Title>Register</Card.Title>
             { errMsg ? <Alert ref={errRef} key='danger' variant='danger' className="">{errMsg}</Alert> : null}
@@ -127,6 +148,7 @@ const Register = () => {
                 </Form.Group>
                 <div className="d-grid gap-2">
                     <Button 
+                    type='submit'
                     variant="primary"
                     disabled={!validName || !validPwd || !validMatch ? true: false}
                     >Register</Button>{' '}
@@ -135,7 +157,8 @@ const Register = () => {
             <Card.Text>
                 Already Registered? <a>Sign In</a>
             </Card.Text>
-        </Card>
+        </Card> )}
+        </>
     )
 }
 
