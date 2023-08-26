@@ -3,12 +3,15 @@ from django.contrib.auth.models import User
 from . import models 
 
 
-class UserSerializer(serializers.ModelSerializer):
+class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username']
-
+        fields = ['username', 'password']
+    
+    def create(self, valiadated_data):
+        user = User.objects.create_user(username=valiadated_data['username'], password=valiadated_data['password'])
+        return user
 
 class ExerciseSerializer(serializers.ModelSerializer):
     bodypart = serializers.StringRelatedField(many=True)
